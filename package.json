@@ -1,0 +1,9 @@
+{
+  "name": "bookseattle",
+  "version": "1.0.0",
+  "description": "bookseattle",
+  "main": "index.js",
+  "repository": "https://github.com/Sofia15/bookseattle-js.git",
+  "author": "Sofia Kim <sofiamhkim@gmail.com>",
+  "license": "GPL"
+}
