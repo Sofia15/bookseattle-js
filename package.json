@@ -27,11 +27,12 @@
     "webpack-dev-server": "^2.5.0"
   },
   "dependencies": {
-    "snabbdom-jsx": "^0.3.1",
-    "webcomponents.js": "^0.7.24",
+    "babel-core": "^6.25.0",
     "enquire.js": "^2.1.6",
     "normalize.css": "^7.0.0",
     "panel": "^0.10.0",
-    "superagent": "^3.5.2"
+    "snabbdom-jsx": "^0.3.1",
+    "superagent": "^3.5.2",
+    "webcomponents.js": "^0.7.24"
   }
 }
