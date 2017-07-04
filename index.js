@@ -18,7 +18,24 @@ document.registerElement('bookseattle-app', class extends Component {
         '':        'home',
       },
 
-      template: state => this.child(`${state.$view}-view`)
+      template: state =>
+        <div>
+          {this.child(`${state.$view}-view`)},
+          {this.child('navigation-view')}
+        </div>
+    };
+  }
+});
+
+document.registerElement('navigation-view', class extends Component {
+  get config() {
+    return {
+      template: state =>
+        <div>
+          <ul>
+            <li><a href="#rooms">rooms</a></li>
+          </ul>
+        </div>
     };
   }
 });
@@ -28,7 +45,7 @@ document.registerElement('home-view', class extends Component {
     return {
       template: state =>
         <div className="home">
-        bookseattle
+            bookseattle
         </div>
     };
   }
