@@ -15,9 +15,7 @@ var webpackConfig = {
         use: ExtractTextPlugin.extract({
           use: "css-loader"
         })
-      }
-    ],
-    loaders: [
+      },
       {
         test: /\.js$/,
         exclude: /node_modules/,
@@ -27,9 +25,9 @@ var webpackConfig = {
             ['transform-react-jsx', {'pragma': 'html'}],
           ],
           presets: ['es2015'],
-        },
-      },
-    ],
+        }
+      }
+    ]
   },
   plugins: [
     new HtmlWebpackPlugin({
