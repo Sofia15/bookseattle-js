@@ -18,8 +18,28 @@ document.registerElement('bookseattle-app', class extends Component {
       routes: {
         // 'bookseattle': () => ({$view: 'bookseattle'}),
         'home':   () => ({$view: 'home'}),
-        'rooms/:name': (stateUpdate, name) => {
-          return ({$view: 'room'})
+        'rooms/:name': function (stateUpdate, name) {
+          request
+            .get(`http://localhost:3000/rooms/${name}`)
+            .set('Accept', 'application/json')
+            .end(function(err, response){
+              // console.log('response.body', response.body)
+              // console.log('name', name);
+              // console.log('this', this);
+              // console.log('stateUpdate', stateUpdate)
+              // console.log('response.body', response.body)
+
+              function showRoom() {
+                this.update({$view: 'room'})
+              }
+
+              window.requestAnimationFrame(showRoom().call(this));
+
+              // console.log('response.body.room', response.body.html);
+              const roomView = document.querySelector('room-view')
+              console.log('roomView', roomView);
+              roomView.insertAdjacentHTML('beforeend', response.body.html)
+            }.bind(this))
         },
         '':        'home'
       },
@@ -63,11 +83,13 @@ document.registerElement('room-view', class extends Component {
       template: state =>
       <div>
         <form action="http://localhost:3000/availability" method="get">
-        <label for="check_in">Check In</label>
-        <input name="check_in" type="date"></input>
-        <label for="check_out">Check Out</label>
-        <input name="check_out" type="date"></input>
-        <input type="submit">Reserve</input>    
+          <label for="check_in">Check In</label>
+          <input name="check_in" type="date"></input>
+          <label for="check_out">Check Out</label>
+          <input name="check_out" type="date"></input>
+          <input type="submit">Reserve</input>
+        </form>
       </div>
+    }
   }
 });
