@@ -5,8 +5,11 @@ import 'normalize.css';
 import 'skeleton-css/css/skeleton.css';
 import './index.css';
 import request from 'superagent';
+import domify from 'domify';
 
 console.log('hello world');
+
+const RAF = () => new Promise(requestAnimationFrame);
 
 document.registerElement('bookseattle-app', class extends Component {
   get config() {
@@ -18,28 +21,8 @@ document.registerElement('bookseattle-app', class extends Component {
       routes: {
         // 'bookseattle': () => ({$view: 'bookseattle'}),
         'home':   () => ({$view: 'home'}),
-        'rooms/:name': function (stateUpdate, name) {
-          request
-            .get(`http://localhost:3000/rooms/${name}`)
-            .set('Accept', 'application/json')
-            .end(function(err, response){
-              // console.log('response.body', response.body)
-              // console.log('name', name);
-              // console.log('this', this);
-              // console.log('stateUpdate', stateUpdate)
-              // console.log('response.body', response.body)
-
-              function showRoom() {
-                this.update({$view: 'room'})
-              }
-
-              window.requestAnimationFrame(showRoom().call(this));
-
-              // console.log('response.body.room', response.body.html);
-              const roomView = document.querySelector('room-view')
-              console.log('roomView', roomView);
-              roomView.insertAdjacentHTML('beforeend', response.body.html)
-            }.bind(this))
+        'rooms/:name': function (_stateUpdate={}, name) {
+            this.renderRoom(name);
         },
         '':        'home'
       },
@@ -50,6 +33,27 @@ document.registerElement('bookseattle-app', class extends Component {
           {this.child('navigation-view')}
         </div>
     };
+  }
+  async renderRoom(name) {
+    const request = new Request(`http://localhost:3000/rooms/${name}`,{
+      headers: new Headers({
+        'Accept': 'application/json'
+      })
+    })
+    try {
+      const response = await fetch(request)
+      const data = await response.json()
+      this.update({
+        $view:'room'
+      })
+      await RAF();
+      const roomView = document.querySelector('room-view');
+      roomView.appendChild(domify(data.html))
+      // console.log(data.html)
+      // console.log(domify(data.html))
+    } catch(e) {
+      console.log('error', e)
+    }
   }
 });
 
@@ -91,5 +95,5 @@ document.registerElement('room-view', class extends Component {
         </form>
       </div>
     }
-  }
+  };
 });
