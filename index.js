@@ -47,8 +47,13 @@ document.registerElement('bookseattle-app', class extends Component {
         $view:'room'
       })
       await RAF();
-      const roomView = document.querySelector('room-view');
-      roomView.appendChild(domify(data.html))
+      const roomContainer = document.querySelector('room-view .room');
+      const currentRoom = roomContainer.children[0]
+      const roomHTML = domify(data.html)
+
+      roomContainer.innerHTML = ""
+      roomContainer.appendChild(roomHTML)
+
       // console.log(data.html)
       // console.log(domify(data.html))
     } catch(e) {
@@ -93,6 +98,9 @@ document.registerElement('room-view', class extends Component {
           <input name="check_out" type="date"></input>
           <input type="submit">Reserve</input>
         </form>
+        <div className="room">
+
+        </div>
       </div>
     }
   };
