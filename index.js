@@ -42,14 +42,16 @@ document.registerElement('bookseattle-app', class extends Component {
     })
     try {
       const response = await fetch(request)
-      const data = await response.json()
+      const room = await response.json()
+      console.log('room', room)
       this.update({
-        $view:'room'
+        $view:'room',
+        room
       })
       await RAF();
       const roomContainer = document.querySelector('room-view .room');
       const currentRoom = roomContainer.children[0]
-      const roomHTML = domify(data.html)
+      const roomHTML = domify(room.html)
 
       roomContainer.innerHTML = ""
       roomContainer.appendChild(roomHTML)
@@ -92,10 +94,13 @@ document.registerElement('room-view', class extends Component {
       template: state =>
       <div>
         <form action="http://localhost:3000/availability" method="get">
-          <label for="check_in">Check In</label>
-          <input name="check_in" type="date"></input>
-          <label for="check_out">Check Out</label>
+          <label>Check In</label>
+          <input type="check_in" type="date"></input>
+          <label>Check Out</label>
           <input name="check_out" type="date"></input>
+          <label>Guests</label>
+          <input name="max_guests" type="number" min="1" max={`${state.room.max_guests}`}></input>
+          <br />
           <input type="submit">Reserve</input>
         </form>
         <div className="room">
