@@ -5,3 +5,8 @@
 img {
   max-width: 100%;
 }
+
+div {
+  background-color: lime;
+  font-family: fantasy;
+}

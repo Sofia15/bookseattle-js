@@ -6,6 +6,7 @@ import 'skeleton-css/css/skeleton.css';
 import './index.css';
 import request from 'superagent';
 import domify from 'domify';
+import './index.css';
 
 console.log('hello world');
 
@@ -91,13 +92,15 @@ document.registerElement('home-view', class extends Component {
 document.registerElement('room-view', class extends Component {
   get config() {
     return {
-      template: state =>
+      template: state => {
+      return(
       <div>
         <form action="http://localhost:3000/availability" method="get">
           <label>Check In</label>
-          <input type="check_in" type="date"></input>
+          <input type="check_in" type="date" list="checkin_dates"></input>
+
           <label>Check Out</label>
-          <input name="check_out" type="date"></input>
+          <input name="check_out" type="date" list="checkout_dates"></input>
           <label>Guests</label>
           <input name="max_guests" type="number" min="1" max={`${state.room.max_guests}`}></input>
           <br />
@@ -106,7 +109,8 @@ document.registerElement('room-view', class extends Component {
         <div className="room">
 
         </div>
-      </div>
+      </div>)
+      }
     }
   };
 });
