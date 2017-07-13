@@ -9,6 +9,7 @@ import request from 'superagent';
 import domify from 'domify';
 import './index.css';
 import './airbnb.css';
+import serialize from 'form-serialize';
 
 console.log('hello world');
 console.log(flatpickr);
@@ -102,13 +103,18 @@ document.registerElement('room-view', class extends Component {
     return {
       helpers: {
         submitReservation: (ev) => {
-          event.preventDefault();
+          ev.preventDefault();
 
-          console.log(ev);
+          const form = ev.target.parentNode;
+
+          const reservation = serialize(form, {hash: true})
+
+          this.update({reservation})
         }
       },
 
       template: state => {
+        console.log('state', state)
         return (
           <div>
             <form action="" method="">
