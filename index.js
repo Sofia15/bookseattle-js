@@ -1,18 +1,14 @@
 import 'webcomponents.js/webcomponents-lite.js'; // polyfill
 import { Component } from 'panel';
-import flatpickr from 'flatpickr';
 import { html } from 'snabbdom-jsx';
+import flatpickr from 'flatpickr';
+import request from 'superagent';
+import domify from 'domify';
+import serialize from 'form-serialize';
 import 'normalize.css';
 import 'skeleton-css/css/skeleton.css';
 import './index.css';
-import request from 'superagent';
-import domify from 'domify';
-import './index.css';
 import './airbnb.css';
-import serialize from 'form-serialize';
-
-console.log('hello world');
-console.log(flatpickr);
 
 const RAF = () => new Promise(requestAnimationFrame);
 
@@ -24,22 +20,21 @@ document.registerElement('bookseattle-app', class extends Component {
       },
 
       routes: {
-        // 'bookseattle': () => ({$view: 'bookseattle'}),
-        // 'home': () => {return {$view: 'home'}},
-        // 'home': function home() {return {$view: 'home'}},
         'home':   () => ({$view: 'home'}),
         'rooms/:name': function (_stateUpdate={}, name) {
             this.renderRoom(name);
         },
         'house-rules': () => ({$view: 'house-rules'}),
-        'reservation-confirmation': () => ({$view: 'reservation-confirmation'}),
+        'reservation-confirmation': () =>
+          ({$view: 'reservation-confirmation'}),
+        'itinerary': () => ({$view: 'itinerary'}),
         '':        'home'
       },
 
       template: state =>
         <div>
-          {this.child(`${state.$view}-view`)},
-          {this.child('navigation-view')}
+          {this.child(`${state.$view}-view`)}
+
         </div>
     };
   }
@@ -84,7 +79,9 @@ document.registerElement('navigation-view', class extends Component {
       template: state =>
         <div>
           <ul>
-            <li><a href="#home">rooms</a></li>
+            <li><a href="#rooms/paris">Paris</a></li>
+            <li><a href="#rooms/dorm">Dorm</a></li>
+            <li><a href="#rooms/wonderland">Wonderland</a></li>
           </ul>
         </div>
     };
@@ -97,6 +94,7 @@ document.registerElement('home-view', class extends Component {
       template: state =>
         <div className="container">
             <img src="https://s3-us-west-2.amazonaws.com/www.bookseattle.net/rooms/banner.png" />
+                {this.child('navigation-view')}
         </div>
     };
   }
@@ -169,12 +167,29 @@ document.registerElement('house-rules-view', class extends Component {
 document.registerElement('reservation-confirmation-view', class extends Component {
   get config() {
     return {
-      template: () =>
+      helpers: {
+        reservationConfirmation: {
+          onBook: (ev) => {
+            this.navigate('itinerary')
+          }
+        }
+      },
+      template: (state) =>
       <div>
         <h2>Payment Instructions</h2>
         <p>We only accept Venmo(id: bookseattle) or cash payments at check-in</p>
-        <button name="reservation_confirmation">Book</button>
+        <button name="reservation_confirmation" on-click={state.$helpers.reservationConfirmation.onBook}>Book</button>
       </div>
+    }
+  }
+});
+
+document.registerElement('itinerary-view', class extends Component {
+  get config() {
+    return {
+      template: () =>
+        <div>You booked Seattle!!</div>
+
     }
   }
 });
