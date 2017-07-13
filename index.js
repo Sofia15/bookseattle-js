@@ -25,10 +25,13 @@ document.registerElement('bookseattle-app', class extends Component {
 
       routes: {
         // 'bookseattle': () => ({$view: 'bookseattle'}),
+        // 'home': () => {return {$view: 'home'}},
+        // 'home': function home() {return {$view: 'home'}},
         'home':   () => ({$view: 'home'}),
         'rooms/:name': function (_stateUpdate={}, name) {
             this.renderRoom(name);
         },
+        'house-rules': () => ({$view: 'house-rules'}),
         '':        'home'
       },
 
@@ -52,7 +55,7 @@ document.registerElement('bookseattle-app', class extends Component {
       this.update({
         $view:'room',
         room
-      })
+      });
       await RAF();
       const roomContainer = document.querySelector('room-view .room');
       const currentRoom = roomContainer.children[0]
@@ -109,7 +112,7 @@ document.registerElement('room-view', class extends Component {
 
           const reservation = serialize(form, {hash: true})
 
-          this.update({reservation})
+          this.navigate('house-rules', {reservation})
         }
       },
 
@@ -135,4 +138,22 @@ document.registerElement('room-view', class extends Component {
       }
     }
   };
+});
+
+document.registerElement('house-rules-view', class extends Component {
+    get config() {
+      return {
+        template: () =>
+          <div>
+            <h2>Review house rules</h2>
+            <ul>
+              <li>No smoking</li>
+              <li>No yelling, there could be babies and they cry</li>
+              <li>Check in anytime before 6pm</li>
+            </ul>
+            <button name="rules_acceptance">Agree and confirm</button>
+          </div>
+      }
+    }
+
 });
