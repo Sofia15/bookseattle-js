@@ -100,24 +100,32 @@ document.registerElement('home-view', class extends Component {
 document.registerElement('room-view', class extends Component {
   get config() {
     return {
-      template: state => {
-      return (
-      <div>
-        <form action="" method="">
-          <label>Check In</label>
-          <input name="check_in" placeholder="yyyy-mm-dd" type="text" className="flatpickr"></input>
-          <label>Check Out</label>
-          <input name="check_out" placeholder="yyyy-mm-dd" type="text" className="flatpickr"></input>
-          <label>Guests</label>
-          <input name="max_guests" type="number" value="1" min="1" max={`${state.room.max_guests}`}></input>
-          <br />
-          <input type="submit">Reserve</input>
-        </form>
-        <div className="room">
+      helpers: {
+        submitReservation: (ev) => {
+          event.preventDefault();
 
-        </div>
-      </div>
-          )
+          console.log(ev);
+        }
+      },
+
+      template: state => {
+        return (
+          <div>
+            <form action="" method="">
+              <label>Check In</label>
+              <input name="check_in" placeholder="yyyy-mm-dd" type="text" className="flatpickr"></input>
+              <label>Check Out</label>
+              <input name="check_out" placeholder="yyyy-mm-dd" type="text" className="flatpickr"></input>
+              <label>Guests</label>
+              <input name="max_guests" type="number" value="1" min="1" max={`${state.room.max_guests}`}></input>
+              <br />
+              <input type="submit" on-click={state.$helpers.submitReservation} >Reserve</input>
+            </form>
+            <div className="room">
+
+            </div>
+          </div>
+        )
       }
     }
   };
