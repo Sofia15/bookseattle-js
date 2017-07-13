@@ -32,6 +32,7 @@ document.registerElement('bookseattle-app', class extends Component {
             this.renderRoom(name);
         },
         'house-rules': () => ({$view: 'house-rules'}),
+        'reservation-confirmation': () => ({$view: 'reservation-confirmation'}),
         '':        'home'
       },
 
@@ -143,7 +144,15 @@ document.registerElement('room-view', class extends Component {
 document.registerElement('house-rules-view', class extends Component {
     get config() {
       return {
-        template: () =>
+        helpers: {
+          houseRules: {
+            onAcceptance: (ev) => {
+              // ev.preventDefault();
+              this.navigate('reservation-confirmation', {accepted: true})
+            }
+          }
+        },
+        template: (state) =>
           <div>
             <h2>Review house rules</h2>
             <ul>
@@ -151,9 +160,21 @@ document.registerElement('house-rules-view', class extends Component {
               <li>No yelling, there could be babies and they cry</li>
               <li>Check in anytime before 6pm</li>
             </ul>
-            <button name="rules_acceptance">Agree and confirm</button>
+            <button name="rules_acceptance" on-click={state.$helpers.houseRules.onAcceptance}>Agree and confirm</button>
           </div>
       }
     }
+});
 
+document.registerElement('reservation-confirmation-view', class extends Component {
+  get config() {
+    return {
+      template: () =>
+      <div>
+        <h2>Payment Instructions</h2>
+        <p>We only accept Venmo(id: bookseattle) or cash payments at check-in</p>
+        <button name="reservation_confirmation">Book</button>
+      </div>
+    }
+  }
 });
