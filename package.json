@@ -32,6 +32,7 @@
     "babel-polyfill": "^6.23.0",
     "domify": "^1.4.0",
     "enquire.js": "^2.1.6",
+    "flatpickr": "^3.0.6",
     "normalize.css": "^7.0.0",
     "panel": "^0.10.0",
     "skeleton-css": "^2.0.4",

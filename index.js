@@ -1,5 +1,6 @@
 import 'webcomponents.js/webcomponents-lite.js'; // polyfill
 import { Component } from 'panel';
+import flatpickr from 'flatpickr';
 import { html } from 'snabbdom-jsx';
 import 'normalize.css';
 import 'skeleton-css/css/skeleton.css';
@@ -7,8 +8,10 @@ import './index.css';
 import request from 'superagent';
 import domify from 'domify';
 import './index.css';
+import './airbnb.css';
 
 console.log('hello world');
+console.log(flatpickr);
 
 const RAF = () => new Promise(requestAnimationFrame);
 
@@ -54,8 +57,13 @@ document.registerElement('bookseattle-app', class extends Component {
       const currentRoom = roomContainer.children[0]
       const roomHTML = domify(room.html)
 
+      console.log('room', room)
+
       roomContainer.innerHTML = ""
       roomContainer.appendChild(roomHTML)
+      flatpickr(".flatpickr", {
+        enable: room.available_days.map(day => new Date(day))
+      });
 
       // console.log(data.html)
       // console.log(domify(data.html))
@@ -93,14 +101,13 @@ document.registerElement('room-view', class extends Component {
   get config() {
     return {
       template: state => {
-      return(
+      return (
       <div>
         <form action="http://localhost:3000/availability" method="get">
           <label>Check In</label>
-          <input type="check_in" type="date" list="checkin_dates"></input>
-
+          <input name="check_in" type="text" className="flatpickr"></input>
           <label>Check Out</label>
-          <input name="check_out" type="date" list="checkout_dates"></input>
+          <input name="check_out" type="text" className="flatpickr"></input>
           <label>Guests</label>
           <input name="max_guests" type="number" min="1" max={`${state.room.max_guests}`}></input>
           <br />
@@ -109,7 +116,8 @@ document.registerElement('room-view', class extends Component {
         <div className="room">
 
         </div>
-      </div>)
+      </div>
+          )
       }
     }
   };
