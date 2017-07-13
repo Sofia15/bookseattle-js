@@ -103,13 +103,13 @@ document.registerElement('room-view', class extends Component {
       template: state => {
       return (
       <div>
-        <form action="http://localhost:3000/availability" method="get">
+        <form action="" method="">
           <label>Check In</label>
-          <input name="check_in" type="text" className="flatpickr"></input>
+          <input name="check_in" placeholder="yyyy-mm-dd" type="text" className="flatpickr"></input>
           <label>Check Out</label>
-          <input name="check_out" type="text" className="flatpickr"></input>
+          <input name="check_out" placeholder="yyyy-mm-dd" type="text" className="flatpickr"></input>
           <label>Guests</label>
-          <input name="max_guests" type="number" min="1" max={`${state.room.max_guests}`}></input>
+          <input name="max_guests" type="number" value="1" min="1" max={`${state.room.max_guests}`}></input>
           <br />
           <input type="submit">Reserve</input>
         </form>
