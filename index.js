@@ -1,6 +1,7 @@
 import 'webcomponents.js/webcomponents-lite.js'; // polyfill
 import { Component } from 'panel';
 import { html } from 'snabbdom-jsx';
+// import flatpickr from './node_modules/flatpickr/dist/flatpickr';
 import flatpickr from 'flatpickr';
 import request from 'superagent';
 import domify from 'domify';
@@ -8,7 +9,7 @@ import serialize from 'form-serialize';
 import 'normalize.css';
 import 'skeleton-css/css/skeleton.css';
 import './index.css';
-import './airbnb.css';
+import 'flatpickr/dist/themes/airbnb.css';
 
 const RAF = () => new Promise(requestAnimationFrame);
 
@@ -178,12 +179,12 @@ document.registerElement('reservation-confirmation-view', class extends Componen
           onBook: (ev) => {
             // TODO: POST to http://localhost:3000/reservations
             // Retrieve reservation info from state.
-            const reservation = {};
-            reservation.checkin = this.state.reservation.check_in;
-            reservation.checkout = this.state.reservation.check_in;
-            reservation.guest_count = this.state.reservation.guest_count;
-            reservation.room_id = this.state.room.id;
-
+            const reservation = {
+              checkin: this.state.reservation.check_in,
+              checkout: this.state.reservation.check_out,
+              guest_count: this.state.reservation.guest_count,
+              room_id: this.state.room.id
+            };
             console.log(reservation)
             const body = JSON.stringify({reservation});
             this.onCreate(body);
