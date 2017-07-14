@@ -1,7 +1,6 @@
 import 'webcomponents.js/webcomponents-lite.js'; // polyfill
 import { Component } from 'panel';
 import { html } from 'snabbdom-jsx';
-// import flatpickr from './node_modules/flatpickr/dist/flatpickr';
 import flatpickr from 'flatpickr';
 import request from 'superagent';
 import domify from 'domify';
@@ -217,7 +216,7 @@ document.registerElement('reservation-confirmation-view', class extends Componen
       const response = await fetch(request);
       console.log('reservationResponse', response)
       const body = await response.json();
-      console.log('reservationResponseBody', body)
+      console.log('body', body)
       if (body["errors"]) {
         return this.update({errors: body["errors"]})
       }
