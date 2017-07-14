@@ -17,6 +17,7 @@ document.registerElement('bookseattle-app', class extends Component {
     return {
       defaultState: {
         $view: 'home',
+        errors: []
       },
 
       routes: {
@@ -33,8 +34,9 @@ document.registerElement('bookseattle-app', class extends Component {
 
       template: state =>
         <div>
+          <a href="#home">Home</a>
+          {this.child('errors-view')}
           {this.child(`${state.$view}-view`)}
-
         </div>
     };
   }
@@ -46,6 +48,7 @@ document.registerElement('bookseattle-app', class extends Component {
     })
     try {
       const response = await fetch(request)
+      console.log('response', response)
       const room = await response.json()
       console.log('room', room)
       this.update({
@@ -81,7 +84,7 @@ document.registerElement('navigation-view', class extends Component {
           <ul>
             <li><a href="#rooms/paris">Paris</a></li>
             <li><a href="#rooms/dorm">Dorm</a></li>
-            <li><a href="#rooms/wonderland">Wonderland</a></li>
+            <li><a href="#rooms/wonderworld">Wonderworld</a></li>
           </ul>
         </div>
     };
@@ -125,7 +128,7 @@ document.registerElement('room-view', class extends Component {
               <label>Check Out</label>
               <input name="check_out" placeholder="yyyy-mm-dd" type="text" className="flatpickr"></input>
               <label>Guests</label>
-              <input name="max_guests" type="number" value="1" min="1" max={`${state.room.max_guests}`}></input>
+              <input name="guest_count" type="number" value="1" min="1" max={`${state.room.max_guests}`}></input>
               <br />
               <input type="submit" on-click={state.$helpers.submitReservation} >Reserve</input>
             </form>
@@ -152,13 +155,16 @@ document.registerElement('house-rules-view', class extends Component {
         },
         template: (state) =>
           <div>
-            <h2>Review house rules</h2>
-            <ul>
-              <li>No smoking</li>
-              <li>No yelling, there could be babies and they cry</li>
-              <li>Check in anytime before 6pm</li>
-            </ul>
-            <button name="rules_acceptance" on-click={state.$helpers.houseRules.onAcceptance}>Agree and confirm</button>
+            <div>
+              <h2>Review house rules</h2>
+              <ul>
+                <li>No smoking</li>
+                <li>No yelling, there could be babies and they cry</li>
+                <li>Check in anytime before 6pm</li>
+              </ul>
+              <button name="rules_acceptance" on-click={state.$helpers.houseRules.onAcceptance}>Agree and confirm</button>
+            </div>
+            {this.child('summary-view')}
           </div>
       }
     }
@@ -170,16 +176,53 @@ document.registerElement('reservation-confirmation-view', class extends Componen
       helpers: {
         reservationConfirmation: {
           onBook: (ev) => {
-            this.navigate('itinerary')
+            // TODO: POST to http://localhost:3000/reservations
+            // Retrieve reservation info from state.
+            const reservation = {};
+            reservation.checkin = this.state.reservation.check_in;
+            reservation.checkout = this.state.reservation.check_in;
+            reservation.guest_count = this.state.reservation.guest_count;
+            reservation.room_id = this.state.room.id;
+
+            console.log(reservation)
+            const body = JSON.stringify({reservation});
+            this.onCreate(body);
           }
         }
       },
       template: (state) =>
-      <div>
-        <h2>Payment Instructions</h2>
-        <p>We only accept Venmo(id: bookseattle) or cash payments at check-in</p>
-        <button name="reservation_confirmation" on-click={state.$helpers.reservationConfirmation.onBook}>Book</button>
-      </div>
+        <div>
+          <h2>Payment Instructions</h2>
+          <p>We only accept Venmo(id: bookseattle) or cash payments at check-in</p>
+          <button name="reservation_confirmation" on-click={state.$helpers.reservationConfirmation.onBook}>Book</button>
+        </div>
+    }
+  };
+
+  async onCreate(body) {
+    console.log('body', body)
+    const request = new Request('http://localhost:3000/reservations', {
+      method: 'POST',
+      body: body,
+      headers: new Headers({
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      })
+    });
+
+    console.log('fetch request', request)
+
+    try {
+      const response = await fetch(request);
+      console.log('reservationResponse', response)
+      const body = await response.json();
+      console.log('reservationResponseBody', body)
+      if (body["errors"]) {
+        return this.update({errors: body["errors"]})
+      }
+      this.navigate('itinerary');
+    } catch(e) {
+      console.log('e', e);
     }
   }
 });
@@ -190,6 +233,32 @@ document.registerElement('itinerary-view', class extends Component {
       template: () =>
         <div>You booked Seattle!!</div>
 
+    }
+  }
+});
+
+document.registerElement('summary-view', class extends Component {
+  get config() {
+    return {
+      template: (state) =>
+        console.log(state) ||
+        <aside>
+         <h1>{state.reservation.check_in}</h1>
+        </aside>
+    }
+  }
+
+});
+
+document.registerElement('errors-view', class extends Component {
+  get config() {
+    return {
+      template: state =>
+        <div>
+          {state.errors.map(function (e) {
+            return <p>{e}</p>;
+          })}
+        </div>
     }
   }
 });
