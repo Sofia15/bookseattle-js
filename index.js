@@ -9,7 +9,10 @@ import 'normalize.css';
 import 'skeleton-css/css/skeleton.css';
 import './index.css';
 import 'flatpickr/dist/themes/airbnb.css';
+import moment from 'moment';
+import business from 'moment-business';
 
+// console.log('moment',moment);
 const RAF = () => new Promise(requestAnimationFrame);
 
 document.registerElement('bookseattle-app', class extends Component {
@@ -114,6 +117,7 @@ document.registerElement('room-view', class extends Component {
 
           const reservation = serialize(form, {hash: true})
 
+
           this.navigate('house-rules', {reservation})
         }
       },
@@ -200,7 +204,7 @@ document.registerElement('reservation-confirmation-view', class extends Componen
   };
 
   async onCreate(body) {
-    console.log('body', body)
+    // console.log('body', body)
     const request = new Request('http://localhost:3000/reservations', {
       method: 'POST',
       body: body,
@@ -209,8 +213,7 @@ document.registerElement('reservation-confirmation-view', class extends Componen
         'Accept': 'application/json'
       })
     });
-
-    console.log('fetch request', request)
+    // console.log('fetch request', request)
 
     try {
       const response = await fetch(request);
@@ -232,7 +235,6 @@ document.registerElement('itinerary-view', class extends Component {
     return {
       template: () =>
         <div>You booked Seattle!!</div>
-
     }
   }
 });

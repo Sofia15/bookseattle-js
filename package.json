@@ -34,6 +34,8 @@
     "enquire.js": "^2.1.6",
     "flatpickr": "^3.0.6",
     "form-serialize": "^0.7.2",
+    "moment": "^2.18.1",
+    "moment-business": "^3.0.1",
     "normalize.css": "^7.0.0",
     "panel": "^0.10.0",
     "skeleton-css": "^2.0.4",
