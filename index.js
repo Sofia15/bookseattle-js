@@ -44,7 +44,7 @@ document.registerElement('bookseattle-app', class extends Component {
     };
   }
   async renderRoom(name) {
-    const request = new Request(`http://localhost:3000/rooms/${name}`,{
+    const request = new Request(`http://api.bookseattle.net/rooms/${name}`,{
       headers: new Headers({
         'Accept': 'application/json'
       })
@@ -180,7 +180,7 @@ document.registerElement('reservation-confirmation-view', class extends Componen
       helpers: {
         reservationConfirmation: {
           onBook: (ev) => {
-            // TODO: POST to http://localhost:3000/reservations
+            // TODO: POST to http://api.bookseattle.net/reservations
             // Retrieve reservation info from state.
             const reservation = {
               checkin: this.state.reservation.check_in,
@@ -205,7 +205,7 @@ document.registerElement('reservation-confirmation-view', class extends Componen
 
   async onCreate(body) {
     // console.log('body', body)
-    const request = new Request('http://localhost:3000/reservations', {
+    const request = new Request('http://api.bookseattle.net/reservations', {
       method: 'POST',
       body: body,
       headers: new Headers({
