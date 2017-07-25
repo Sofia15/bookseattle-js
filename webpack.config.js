@@ -3,7 +3,7 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 var path = require('path');
 
 var webpackConfig = {
-  entry: ['babel-polyfill', './index.js'],
+  entry: ['babel-polyfill', 'webcomponents.js/webcomponents-lite.js', 'whatwg-fetch' ,'./index.js'],
   output: {
     path: path.resolve('./dist'),
     filename: 'index.[hash:16].js',

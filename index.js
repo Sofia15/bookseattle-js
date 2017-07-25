@@ -1,4 +1,3 @@
-import 'webcomponents.js/webcomponents-lite.js'; // polyfill
 import { Component } from 'panel';
 import { html } from 'snabbdom-jsx';
 import flatpickr from 'flatpickr';
