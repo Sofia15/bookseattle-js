@@ -3,9 +3,27 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 var path = require('path');
 var { API_URL } = require('./webpack.environment.config');
 var webpack = require('webpack');
+var S3Plugin = require('webpack-s3-plugin');
+var deploy;
 var environment = process.env.NODE_ENV === 'production' ?
     'production' :
     'development';
+
+if (environment === "production") {
+  deploy = new S3Plugin({
+    s3Options: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      region: 'us-west-2'
+    },
+    s3UploadOptions: {
+      Bucket: 'www.bookseattle.net'
+    },
+    cloudfrontInvalidateOptions: {
+      DistributionId: process.env.CLOUDFRONT_DISTRIBUTION_ID,
+      Items: ["/*"]
+    }});
+}
 
 var webpackConfig = {
   entry: ['babel-polyfill', 'webcomponents.js/webcomponents-lite.js', 'whatwg-fetch', './index.js'],
@@ -45,8 +63,9 @@ var webpackConfig = {
     new ExtractTextPlugin('index.[hash:16].css'),
     new webpack.DefinePlugin({
       API_URL: API_URL[environment]
-    })
-  ]
+    }),
+    deploy
+  ].filter(Boolean)
 };
 
 module.exports = webpackConfig;
