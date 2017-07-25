@@ -43,7 +43,7 @@ document.registerElement('bookseattle-app', class extends Component {
     };
   }
   async renderRoom(name) {
-    const request = new Request(`http://api.bookseattle.net/rooms/${name}`,{
+    const request = new Request(`${API_URL}/rooms/${name}`,{
       headers: new Headers({
         'Accept': 'application/json'
       })
@@ -204,7 +204,7 @@ document.registerElement('reservation-confirmation-view', class extends Componen
 
   async onCreate(body) {
     // console.log('body', body)
-    const request = new Request('http://api.bookseattle.net/reservations', {
+    const request = new Request(`${API_URL}/reservations`, {
       method: 'POST',
       body: body,
       headers: new Headers({

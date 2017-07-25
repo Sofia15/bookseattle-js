@@ -25,7 +25,7 @@
     "html-webpack-plugin": "^2.29.0",
     "surge": "^0.19.0",
     "tape": "^4.7.0",
-    "webpack": "^3.0.0",
+    "webpack": "^3.3.0",
     "webpack-dev-server": "^2.5.0",
     "webpack-s3-plugin": "^1.0.0-rc.0"
   },
