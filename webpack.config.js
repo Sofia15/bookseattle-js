@@ -5,8 +5,9 @@ var path = require('path');
 var webpackConfig = {
   entry: ['babel-polyfill', './index.js'],
   output: {
-    path: __dirname + 'dist',
-    filename: 'bundle.js'
+    path: path.resolve('./dist'),
+    filename: 'index.[hash:16].js',
+    publicPath: '/'
   },
   module: {
     rules: [
@@ -31,11 +32,11 @@ var webpackConfig = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      inject: 'head',
+      favicon: 'logo.ico',
       template: 'index.html',
-      hash: true
+      hash: false
     }),
-    new ExtractTextPlugin('index.css')
+    new ExtractTextPlugin('index.[hash:16].css')
   ],
   // resolveLoader: {
   //   root: path.join(__dirname, 'node_modules'),

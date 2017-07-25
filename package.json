@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "./node_modules/.bin/webpack-dev-server --inline",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "webpack": "./node_modules/webpack/bin/webpack.js",
+    "build": "webpack"
   },
   "repository": "https://github.com/Sofia15/bookseattle-js.git",
   "author": "Sofia Kim <sofiamhkim@gmail.com>",
