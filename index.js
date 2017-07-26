@@ -98,9 +98,15 @@ document.registerElement('home-view', class extends Component {
   get config() {
     return {
       template: state =>
-        <div className="container">
+        <div>
             <img src="https://s3-us-west-2.amazonaws.com/www.bookseattle.net/rooms/banner.png" />
                 {this.child('navigation-view')}
+            <img src="https://s3-us-west-2.amazonaws.com/www.bookseattle.net/gasworks.jpeg" />
+            <img src="https://s3-us-west-2.amazonaws.com/www.bookseattle.net/gasworks.jpeg" />
+            <img src="https://s3-us-west-2.amazonaws.com/www.bookseattle.net/gasworks.jpeg" />
+            <img src="https://s3-us-west-2.amazonaws.com/www.bookseattle.net/gasworks.jpeg" />
+            <img src="https://s3-us-west-2.amazonaws.com/www.bookseattle.net/mountain.jpg" />
+            <img src="https://s3-us-west-2.amazonaws.com/www.bookseattle.net/coffee.jpg" />
         </div>
     };
   }
