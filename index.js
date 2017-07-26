@@ -55,6 +55,7 @@ document.registerElement('bookseattle-app', class extends Component {
       console.log('room', room)
       this.update({
         $view:'room',
+        $fragment: `#rooms/${name}`,
         room
       });
       await RAF();
@@ -67,7 +68,7 @@ document.registerElement('bookseattle-app', class extends Component {
       roomContainer.innerHTML = ""
       roomContainer.appendChild(roomHTML)
       flatpickr(".flatpickr", {
-        enable: room.available_days.map(day => new Date(day))
+        enable: room.available_days.map(day => day)
       });
 
       // console.log(data.html)
@@ -133,7 +134,7 @@ document.registerElement('room-view', class extends Component {
               <label>Guests</label>
               <input name="guest_count" type="number" value="1" min="1" max={`${state.room.max_guests}`}></input>
               <br />
-              <input type="submit" on-click={state.$helpers.submitReservation} >Reserve</input>
+              <input type="submit" value="Reserve" on-click={state.$helpers.submitReservation} ></input>
             </form>
             <div className="room">
 

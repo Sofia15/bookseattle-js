@@ -8,5 +8,6 @@ img {
 
 div {
   /*background-color: lime;*/
-  font-family: fantasy;
+  font-family: sans-serif;
+  padding: 1%;
 }

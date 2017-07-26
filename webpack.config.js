@@ -56,7 +56,7 @@ var webpackConfig = {
 
   plugins: [
     new HtmlWebpackPlugin({
-      favicon: 'logo.ico',
+      favicon: 'favicon.ico',
       template: 'index.html',
       hash: false
     }),
