@@ -39,7 +39,13 @@ document.registerElement('bookseattle-app', class extends Component {
           <a href="#home">Home</a>
           {this.child('errors-view')}
           {this.child(`${state.$view}-view`)}
+          <footer>
+            <div className="rule_76irmj"></div>
+            <hr></hr>
+            <p><small>&copy; BookSeattle</small></p>
+          </footer>
         </div>
+
     };
   }
   async renderRoom(name) {
@@ -83,11 +89,35 @@ document.registerElement('navigation-view', class extends Component {
   get config() {
     return {
       template: state =>
-        <div>
+        <div className="row">
           <ul>
-            <li><a href="#rooms/paris">Paris</a></li>
-            <li><a href="#rooms/dorm">Dorm</a></li>
-            <li><a href="#rooms/wonderworld">Wonderworld</a></li>
+            <li>
+              <a href="#rooms/paris">
+                Paris
+                <img src="http://www.bookseattle.net/rooms/paris.jpg" />
+              </a>
+            </li>
+            <li>
+              <a href="#rooms/dorm">
+                Dorm
+                <img src="http://www.bookseattle.net/rooms/dorm_paint.jpeg" />
+              </a>
+            </li>
+            <li>
+              <a href="#rooms/wonderworld">
+                Wonder World
+                <img src="http://www.bookseattle.net/rooms/hellokitty2.jpg" />
+              </a>
+            </li>
+            <li>
+              <img src="https://s3-us-west-2.amazonaws.com/www.bookseattle.net/rooms/mama.jpeg" />
+            </li>
+            <li>
+              <img src="http://www.bookseattle.net/gasworks.jpeg" />
+            </li>
+            <li>
+              <img src="http://www.bookseattle.net/coffee.jpg" />
+            </li>
           </ul>
         </div>
     };
@@ -99,14 +129,9 @@ document.registerElement('home-view', class extends Component {
     return {
       template: state =>
         <div>
-            <img src="https://s3-us-west-2.amazonaws.com/www.bookseattle.net/rooms/banner.png" />
+            <img src="http://www.bookseattle.net/rooms/banner.png" />
                 {this.child('navigation-view')}
-            <img src="https://s3-us-west-2.amazonaws.com/www.bookseattle.net/gasworks.jpeg" />
-            <img src="https://s3-us-west-2.amazonaws.com/www.bookseattle.net/gasworks.jpeg" />
-            <img src="https://s3-us-west-2.amazonaws.com/www.bookseattle.net/gasworks.jpeg" />
-            <img src="https://s3-us-west-2.amazonaws.com/www.bookseattle.net/gasworks.jpeg" />
-            <img src="https://s3-us-west-2.amazonaws.com/www.bookseattle.net/mountain.jpg" />
-            <img src="https://s3-us-west-2.amazonaws.com/www.bookseattle.net/coffee.jpg" />
+
         </div>
     };
   }
