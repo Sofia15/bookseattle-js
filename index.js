@@ -58,6 +58,7 @@ document.registerElement('bookseattle-app', class extends Component {
         $view:'room',
         $fragment: `#rooms/${name}`,
         errors: [],
+        reservation: {},
         room
       });
       await RAF();
@@ -150,7 +151,7 @@ document.registerElement('room-view', class extends Component {
           );
           const checkoutIndex = this.state.room.available_days.indexOf(
             reservation.check_out
-          );
+          )
 
          let weekday_count = 0;
          let weekend_count = 0;
