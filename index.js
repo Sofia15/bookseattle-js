@@ -8,10 +8,7 @@ import 'normalize.css';
 import 'skeleton-css/css/skeleton.css';
 import './index.css';
 import 'flatpickr/dist/themes/airbnb.css';
-import moment from 'moment';
-import business from 'moment-business';
 
-// console.log('moment',moment);
 const RAF = () => new Promise(requestAnimationFrame);
 
 document.registerElement('bookseattle-app', class extends Component {
@@ -23,14 +20,14 @@ document.registerElement('bookseattle-app', class extends Component {
       },
 
       routes: {
-        'home':   () => ({$view: 'home'}),
+        'home':   () => ({$view: 'home', errors: []}),
         'rooms/:name': function (_stateUpdate={}, name) {
             this.renderRoom(name);
         },
-        'house-rules': () => ({$view: 'house-rules'}),
+        'house-rules': () => ({$view: 'house-rules', errors: []}),
         'reservation-confirmation': () =>
-          ({$view: 'reservation-confirmation'}),
-        'itinerary': () => ({$view: 'itinerary'}),
+          ({$view: 'reservation-confirmation', errors: []}),
+        'itinerary': () => ({$view: 'itinerary', errors: []}),
         '':        'home'
       },
 
@@ -62,6 +59,7 @@ document.registerElement('bookseattle-app', class extends Component {
       this.update({
         $view:'room',
         $fragment: `#rooms/${name}`,
+        errors: [],
         room
       });
       await RAF();
@@ -149,7 +147,7 @@ document.registerElement('room-view', class extends Component {
           const reservation = serialize(form, {hash: true})
 
 
-          this.navigate('house-rules', {reservation})
+          this.navigate('house-rules', {reservation, errors:[]})
         }
       },
 
