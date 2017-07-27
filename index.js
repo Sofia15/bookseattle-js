@@ -53,9 +53,7 @@ document.registerElement('bookseattle-app', class extends Component {
     })
     try {
       const response = await fetch(request)
-      console.log('response', response)
       const room = await response.json()
-      console.log('room', room)
       this.update({
         $view:'room',
         $fragment: `#rooms/${name}`,
@@ -67,16 +65,12 @@ document.registerElement('bookseattle-app', class extends Component {
       const currentRoom = roomContainer.children[0]
       const roomHTML = domify(room.html)
 
-      console.log('room', room)
-
       roomContainer.innerHTML = ""
       roomContainer.appendChild(roomHTML)
       flatpickr(".flatpickr", {
         enable: room.available_days.map(day => day)
       });
 
-      // console.log(data.html)
-      // console.log(domify(data.html))
     } catch(e) {
       console.log('error', e)
     }
@@ -129,7 +123,6 @@ document.registerElement('home-view', class extends Component {
         <div>
             <img src="http://www.bookseattle.net/rooms/banner.png" />
                 {this.child('navigation-view')}
-
         </div>
     };
   }
@@ -145,14 +138,12 @@ document.registerElement('room-view', class extends Component {
           if (this.state.errors.length > 0) return undefined;
 
           const form = ev.target.parentNode;
-
           const reservation = serialize(form, {hash: true})
 
           this.navigate('house-rules', {reservation: Object.assign(this.state.reservation, reservation), errors:[]})
         },
         calculatePrice: (ev) => {
           const form = ev.target.parentNode;
-
           const reservation = serialize(form, {hash: true})
           const checkinIndex = this.state.room.available_days.indexOf(
             reservation.check_in
@@ -221,7 +212,6 @@ document.registerElement('room-view', class extends Component {
          } else {
            chargesSummary = '';
          }
-        console.log('state', state)
         return (
           <div>
             <div>
@@ -240,7 +230,6 @@ document.registerElement('room-view', class extends Component {
             </form>
             {chargesSummary}
             <div className="room">
-
             </div>
           </div>
         )
@@ -255,7 +244,6 @@ document.registerElement('house-rules-view', class extends Component {
         helpers: {
           houseRules: {
             onAcceptance: (ev) => {
-              // ev.preventDefault();
               this.navigate('reservation-confirmation', {accepted: true})
             }
           }
@@ -289,8 +277,6 @@ document.registerElement('reservation-confirmation-view', class extends Componen
       helpers: {
         reservationConfirmation: {
           onBook: (ev) => {
-            // TODO: POST to http://api.bookseattle.net/reservations
-            // Retrieve reservation info from state.
             const reservation = {
               check_in: this.state.reservation.check_in,
               check_out: this.state.reservation.check_out,
@@ -313,7 +299,6 @@ document.registerElement('reservation-confirmation-view', class extends Componen
   };
 
   async onCreate(body) {
-    // console.log('body', body)
     const request = new Request(`${API_URL}/reservations`, {
       method: 'POST',
       body: body,
@@ -322,7 +307,6 @@ document.registerElement('reservation-confirmation-view', class extends Componen
         'Accept': 'application/json'
       })
     });
-    // console.log('fetch request', request)
 
     try {
       const response = await fetch(request);
@@ -342,8 +326,29 @@ document.registerElement('reservation-confirmation-view', class extends Componen
 document.registerElement('itinerary-view', class extends Component {
   get config() {
     return {
-      template: () =>
-        <div>You booked Seattle!!</div>
+      template: state => {
+        let weekdays, weekends
+        if (!state.reservation || !state.accepted) {
+          state.$component.navigate('home')
+        }
+        if (state.reservation.weekday_count > 0) {
+          weekdays = <p>${state.room.weekday_rate * 1} x {state.reservation.weekday_count} night</p>;
+        }
+        if (state.reservation.weekend_count > 0) {
+          weekends = <p>${state.room.weekend_rate * 1} x {state.reservation.weekend_count} night</p>;
+        }
+
+        return (
+          <div>
+            You booked Seattle!!
+            {weekends || ''}
+            {weekdays || ''}
+            <p>Total: ${state.reservation.total_price * 1}</p>
+            <p>Check-in: {this.state.reservation.check_in}</p>
+            <p>Check-out: {this.state.reservation.check_out}</p>
+          </div>
+        );
+      }
     }
   }
 });
