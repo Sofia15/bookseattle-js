@@ -4,12 +4,19 @@ import flatpickr from 'flatpickr';
 import request from 'superagent';
 import domify from 'domify';
 import serialize from 'form-serialize';
+import loadGoogleMapsAPI from 'load-google-maps-api';
 import 'normalize.css';
 import 'skeleton-css/css/skeleton.css';
+import './icono.min.css'
 import './index.css';
 import 'flatpickr/dist/themes/airbnb.css';
 
 const RAF = () => new Promise(requestAnimationFrame);
+
+loadMap();
+
+const CHECK_IN = '3:00pm - 6:00pm'
+const CHECK_OUT = '12:00pm'
 
 document.registerElement('bookseattle-app', class extends Component {
   get config() {
@@ -33,16 +40,15 @@ document.registerElement('bookseattle-app', class extends Component {
 
       template: state =>
         <div>
-          <a href="#home">Home</a>
+          <a className="icon icono-home" href="#home">Home</a>
           {this.child('errors-view')}
           {this.child(`${state.$view}-view`)}
           <footer>
-            <div className="rule_76irmj"></div>
+            <div className="border"></div>
             <hr></hr>
             <p><small>&copy; BookSeattle</small></p>
           </footer>
         </div>
-
     };
   }
   async renderRoom(name) {
@@ -69,6 +75,7 @@ document.registerElement('bookseattle-app', class extends Component {
       roomContainer.innerHTML = ""
       roomContainer.appendChild(roomHTML)
       flatpickr(".flatpickr", {
+        minDate: room.available_days[0],
         enable: room.available_days.map(day => day)
       });
 
@@ -82,34 +89,22 @@ document.registerElement('navigation-view', class extends Component {
   get config() {
     return {
       template: state =>
-        <div className="row">
+        <div>
+          <p>Traveling to Seattle?</p>
+          <p>Choose the room that speaks to you.</p>
+          <h4>Rooms</h4>
           <ul>
             <li>
-              <a href="#rooms/paris">
-                Paris
-                <img src="http://www.bookseattle.net/rooms/paris.jpg" />
-              </a>
+              <a href="#rooms/paris">Paris</a>
+              <img src="http://www.bookseattle.net/rooms/paris.jpg" />
             </li>
             <li>
-              <a href="#rooms/dorm">
-                Dorm
-                <img src="http://www.bookseattle.net/rooms/dorm_paint.jpeg" />
-              </a>
+              <a href="#rooms/wonderworld">Wonder World</a>
+              <img src="http://www.bookseattle.net/rooms/hellokitty2.jpg" />
             </li>
             <li>
-              <a href="#rooms/wonderworld">
-                Wonder World
-                <img src="http://www.bookseattle.net/rooms/hellokitty2.jpg" />
-              </a>
-            </li>
-            <li>
-              <img src="https://s3-us-west-2.amazonaws.com/www.bookseattle.net/rooms/mama.jpeg" />
-            </li>
-            <li>
-              <img src="http://www.bookseattle.net/gasworks.jpeg" />
-            </li>
-            <li>
-              <img src="http://www.bookseattle.net/coffee.jpg" />
+              <a href="#rooms/dorm">Dorm</a>
+             <img src="http://www.bookseattle.net/rooms/dorm.jpg" />
             </li>
           </ul>
         </div>
@@ -122,19 +117,46 @@ document.registerElement('home-view', class extends Component {
     return {
       template: state =>
         <div>
-            <img src="http://www.bookseattle.net/rooms/banner.png" />
-                {this.child('navigation-view')}
+          <h1 className="title"><span>Book</span><span>Seattle</span></h1>
+          <img className="banner-image" src="http://www.bookseattle.net/rooms/banner.png" />
+          {this.child('navigation-view')}
+          {this.child('google-map-view')}
         </div>
     };
   }
 });
+
+function chargesSummary(state) {
+  let chargesSummary, weekdays, weekends;
+
+  if (!state.reservation || !state.reservation.total_price) {
+    return "";
+  }
+
+  if (state.reservation.weekday_count > 0) {
+    weekdays = <p className="line-item">${state.room.weekday_rate * 1} x {state.reservation.weekday_count} night</p>;
+  }
+
+  if (state.reservation.weekend_count > 0) {
+    weekends = <p className="line-item">${state.room.weekend_rate * 1} x {state.reservation.weekend_count} night <small>(weekend rate)</small></p>;
+  }
+
+  return (
+    <div>
+      <ul>
+        {weekdays || ''}
+        {weekends || ''}
+        <p><b>Total:</b> ${state.reservation.total_price * 1}</p>
+      </ul>
+    </div>
+  );
+}
 
 document.registerElement('room-view', class extends Component {
   get config() {
     return {
       helpers: {
         submitReservation: (ev) => {
-
           ev.preventDefault();
           if (this.state.errors.length > 0) return undefined;
 
@@ -142,84 +164,64 @@ document.registerElement('room-view', class extends Component {
           const reservation = serialize(form, {hash: true})
 
           if (!reservation.check_in || !reservation.check_out || !reservation.guest_count) {
-            return this.update({errors: ['All reservation fields are required.']});
+            return this.update({errors: ['All fields are required.']});
           }
           this.navigate('house-rules', {reservation: Object.assign(this.state.reservation, reservation), errors:[]})
         },
+
         calculatePrice: (ev) => {
           const form = ev.target.parentNode;
           const reservation = serialize(form, {hash: true})
-          const checkinIndex = this.state.room.available_days.indexOf(
-            reservation.check_in
+          const checkinIndex = this.state.room.available_days.indexOf(reservation.check_in);
+          const checkoutIndex = this.state.room.available_days.indexOf(reservation.check_out);
+
+          let weekday_count = 0;
+          let weekend_count = 0;
+
+          if (checkinIndex === -1 || checkoutIndex === -1) {
+            return undefined;
+          }
+
+          if (checkoutIndex <= checkinIndex) {
+            return this.update({errors: ['Check-out must be after check-in.']})
+          }
+
+          const reservationDays = this.state.room.available_days.slice(
+            checkinIndex, checkoutIndex
           );
-          const checkoutIndex = this.state.room.available_days.indexOf(
-            reservation.check_out
-          )
 
-         let weekday_count = 0;
-         let weekend_count = 0;
+          reservationDays.forEach(day => {
+            const date = new Date(day);
+            const dayOfWeekIndex = date.getUTCDay();
+            if (dayOfWeekIndex == 5 || dayOfWeekIndex == 6) {
+              weekend_count += 1;
+            } else {
+              weekday_count += 1;
+            }
+          });
 
-         if (checkinIndex === -1 || checkoutIndex === -1) {
-           return undefined;
-         }
+          const weekday_total = weekday_count * this.state.room.weekday_rate;
+          const weekend_total = weekend_count * this.state.room.weekend_rate;
+          const total_price = weekday_total + weekend_total;
 
-         if (checkoutIndex <= checkinIndex) {
-           return this.update({errors: ['Check-in must come before check-out !!']})
-         }
-
-         const reservationDays = this.state.room.available_days.slice(
-           checkinIndex, checkoutIndex
-         );
-
-         reservationDays.forEach(day => {
-           const date = new Date(day);
-           const dayOfWeekIndex = date.getUTCDay();
-           if (dayOfWeekIndex == 5 || dayOfWeekIndex == 6) {
-             weekend_count += 1;
-           } else {
-             weekday_count += 1;
-           }
-         });
-
-         const weekday_total = weekday_count * this.state.room.weekday_rate;
-         const weekend_total = weekend_count * this.state.room.weekend_rate;
-         const total_price = weekday_total + weekend_total;
-
-         return this.update({errors: [], reservation: {
-           total_price,
-           weekday_count,
-           weekday_total,
-           weekend_count,
-           weekend_total
-         }});
-       }
+          return this.update({errors: [], reservation: {
+            total_price,
+            weekday_count,
+            weekday_total,
+            weekend_count,
+            weekend_total
+          }});
+        }
       },
 
       template: state => {
-        let chargesSummary, weekdays, weekends;
-         if (state.reservation && state.reservation.total_price) {
-           if (state.reservation.weekday_count > 0) {
-             weekdays = <p>${state.room.weekday_rate * 1} x {state.reservation.weekday_count} night</p>;
-           }
-           if (state.reservation.weekend_count > 0) {
-             weekends = <p>${state.room.weekend_rate * 1} x {state.reservation.weekend_count} night</p>;
-           }
-
-           chargesSummary = (
-               <div>
-                 {weekdays || ''}
-                 {weekends || ''}
-                 <p>Total: ${state.reservation.total_price * 1}</p>
-               </div>
-           );
-         } else {
-           chargesSummary = '';
-         }
         return (
           <div>
             <div>
-               <p>${state.room.weekday_rate * 1} <small>per weekday night</small></p>
-               <p>${state.room.weekend_rate * 1} <small>per weekend night</small></p>
+              <ul>
+                <li><p>${state.room.weekday_rate * 1} <small>per weekday night</small></p></li>
+                <li><p>${state.room.weekend_rate * 1} <small>per weekend night</small></p></li>
+              </ul>
             </div>
             <form action="" method="">
               <label>Check In</label>
@@ -229,9 +231,9 @@ document.registerElement('room-view', class extends Component {
               <label>Guests</label>
               <input name="guest_count" type="number" value="1" min="1" max={`${state.room.max_guests}`} on-input={state.$helpers.calculatePrice}></input>
               <br />
-              <input type="submit" value="Reserve" on-click={state.$helpers.submitReservation}></input>
+              <input className="bookseattle-button" type="submit" value="Reserve" on-click={state.$helpers.submitReservation}></input>
             </form>
-            {chargesSummary}
+            {chargesSummary(state)}
             <div className="room">
             </div>
           </div>
@@ -253,18 +255,18 @@ document.registerElement('house-rules-view', class extends Component {
         },
         template: (state) => {
           if (!state.reservation || !state.reservation.check_in) {
-            state.$component.navigate('home')
+            state.$component.navigate('')
           }
           return (
             <div>
-              <div>
+              <div className="review-rules">
                 <h2>Review house rules</h2>
                 <ul>
                   <li>No smoking</li>
                   <li>No yelling, there could be babies and they cry</li>
                   <li>Check in anytime before 6pm</li>
                 </ul>
-                <button name="rules_acceptance" on-click={state.$helpers.houseRules.onAcceptance}>Agree and confirm</button>
+                <button className="bookseattle-button" name="rules_acceptance" on-click={state.$helpers.houseRules.onAcceptance}>Agree and confirm</button>
               </div>
               {this.child('summary-view')}
             </div>
@@ -295,7 +297,7 @@ document.registerElement('reservation-confirmation-view', class extends Componen
         <div>
           <h2>Payment Instructions</h2>
           <p>We only accept Venmo(id: bookseattle) or cash payments at check-in</p>
-          <button name="reservation_confirmation" on-click={state.$helpers.reservationConfirmation.onBook}>Book</button>
+          <button className="bookseattle-button" name="reservation_confirmation" on-click={state.$helpers.reservationConfirmation.onBook}>Book</button>
         </div>
     }
   };
@@ -322,29 +324,37 @@ document.registerElement('reservation-confirmation-view', class extends Componen
   }
 });
 
+document.registerElement('itinerary-summary-view', class extends Component {
+  get config() {
+    return {
+      template: state => {
+        console.log('state!', state)
+        return <div>
+          <img src={`${state.room.photo_url}`} alt="Photo of the room" />
+          {chargesSummary(state)}
+        </div>
+      }
+    }
+  }
+});
+
 document.registerElement('itinerary-view', class extends Component {
   get config() {
     return {
       template: state => {
-        let weekdays, weekends
         if (!state.reservation || !state.accepted) {
           state.$component.navigate('home')
-        }
-        if (state.reservation.weekday_count > 0) {
-          weekdays = <p>${state.room.weekday_rate * 1} x {state.reservation.weekday_count} night</p>;
-        }
-        if (state.reservation.weekend_count > 0) {
-          weekends = <p>${state.room.weekend_rate * 1} x {state.reservation.weekend_count} night</p>;
         }
 
         return (
           <div>
-            You booked Seattle!!
-            {weekends || ''}
-            {weekdays || ''}
-            <p>Total: ${state.reservation.total_price * 1}</p>
-            <p>Check-in: {this.state.reservation.check_in}</p>
-            <p>Check-out: {this.state.reservation.check_out}</p>
+            <p>Your reservation is complete.</p>
+            <p>Please keep a copy of the following for your records:</p>
+            {chargesSummary(state)}
+            <ul>
+              <li><p>Check in: {this.state.reservation.check_in} at {CHECK_IN}</p></li>
+              <li><p>Check out: {this.state.reservation.check_out} at {CHECK_OUT}</p></li>
+            </ul>
           </div>
         );
       }
@@ -355,10 +365,19 @@ document.registerElement('itinerary-view', class extends Component {
 document.registerElement('summary-view', class extends Component {
   get config() {
     return {
-      template: (state) =>
-        <aside>
-         <h1>{state.reservation.check_in}</h1>
+      template: (state) => {
+        if (!state.room) {
+          state.$component.navigate('home');
+        }
+
+        return <aside>
+          <ul>
+          <li><p>Location: {state.room.location.name}</p></li>
+          <li><p>Room: {state.room.name}</p></li>
+          </ul>
+          {this.child('itinerary-summary-view')}
         </aside>
+      }
     }
   }
 
@@ -376,3 +395,40 @@ document.registerElement('errors-view', class extends Component {
     }
   }
 });
+
+document.registerElement('google-map-view', class extends Component {
+  get config() {
+    return {
+      template: () =>
+        <div>
+        </div>
+    }
+  };
+});
+
+async function loadMap() {
+  // console.log('')
+  try {
+    const googleMaps = await loadGoogleMapsAPI({key: GOOGLE_MAPS_API_KEY});
+    await RAF();
+    const mapContainer = document.querySelector('google-map-view div');
+    const coordinates = {lat: 47.6076, lng: -122.3347};
+    const map = await new googleMaps.Map(mapContainer, {
+		  center: coordinates,
+		  zoom: 15
+	  });
+    await new googleMaps.Marker({
+      position: coordinates,
+      map: map
+    });
+    googleMaps.event.addDomListener(window, "resize", function() {
+      var center = map.getCenter();
+      googleMaps.event.trigger(map, "resize");
+      map.setCenter(center);
+    });
+    await RAF();
+    return '';
+  } catch(e) {
+    console.log('error', e)
+  }
+}

@@ -1,7 +1,7 @@
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var path = require('path');
-var { API_URL } = require('./webpack.environment.config');
+var { API_URL, GOOGLE_MAPS_API_KEY } = require('./webpack.environment.config');
 var webpack = require('webpack');
 var S3Plugin = require('webpack-s3-plugin');
 var deploy;
@@ -62,7 +62,8 @@ var webpackConfig = {
     }),
     new ExtractTextPlugin('index.[hash:16].css'),
     new webpack.DefinePlugin({
-      API_URL: API_URL[environment]
+      API_URL: API_URL[environment],
+      GOOGLE_MAPS_API_KEY: GOOGLE_MAPS_API_KEY
     }),
     deploy
   ].filter(Boolean)

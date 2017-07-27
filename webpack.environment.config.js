@@ -3,4 +3,6 @@ var API_URL = {
   production: JSON.stringify('http://api.bookseattle.net')
 };
 
-module.exports = { API_URL };
+var GOOGLE_MAPS_API_KEY = JSON.stringify('AIzaSyCiZ3VUSTI4zIZfZRVeECJ1eip_cfaduvg');
+
+module.exports = { API_URL, GOOGLE_MAPS_API_KEY };
