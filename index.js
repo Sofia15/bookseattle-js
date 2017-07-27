@@ -142,29 +142,103 @@ document.registerElement('room-view', class extends Component {
         submitReservation: (ev) => {
           ev.preventDefault();
 
+          if (this.state.errors.length > 0) return undefined;
+
           const form = ev.target.parentNode;
 
           const reservation = serialize(form, {hash: true})
 
+          this.navigate('house-rules', {reservation: Object.assign(this.state.reservation, reservation), errors:[]})
+        },
+        calculatePrice: (ev) => {
+          const form = ev.target.parentNode;
 
-          this.navigate('house-rules', {reservation, errors:[]})
-        }
+          const reservation = serialize(form, {hash: true})
+          const checkinIndex = this.state.room.available_days.indexOf(
+            reservation.check_in
+          );
+          const checkoutIndex = this.state.room.available_days.indexOf(
+            reservation.check_out
+          );
+
+         let weekday_count = 0;
+         let weekend_count = 0;
+
+         if (checkinIndex === -1 || checkoutIndex === -1) {
+           return undefined;
+         }
+
+         if (checkoutIndex <= checkinIndex) {
+           return this.update({errors: ['Check-in must come before check-out !!']})
+         }
+
+         const reservationDays = this.state.room.available_days.slice(
+           checkinIndex, checkoutIndex
+         );
+
+         reservationDays.forEach(day => {
+           const date = new Date(day);
+           const dayOfWeekIndex = date.getUTCDay();
+           if (dayOfWeekIndex == 5 || dayOfWeekIndex == 6) {
+             weekend_count += 1;
+           } else {
+             weekday_count += 1;
+           }
+         });
+
+         const weekday_total = weekday_count * this.state.room.weekday_rate;
+         const weekend_total = weekend_count * this.state.room.weekend_rate;
+         const total_price = weekday_total + weekend_total;
+
+         return this.update({errors: [], reservation: {
+           total_price,
+           weekday_count,
+           weekday_total,
+           weekend_count,
+           weekend_total
+         }});
+       }
       },
 
       template: state => {
+        let chargesSummary, weekdays, weekends;
+
+         if (state.reservation && state.reservation.total_price) {
+           if (state.reservation.weekday_count > 0) {
+             weekdays = <p>${state.room.weekday_rate * 1} x {state.reservation.weekday_count} night</p>;
+           }
+           if (state.reservation.weekend_count > 0) {
+             weekends = <p>${state.room.weekend_rate * 1} x {state.reservation.weekend_count} night</p>;
+           }
+
+           chargesSummary = (
+               <div>
+                 {weekdays || ''}
+                 {weekends || ''}
+                 <p>Total: ${state.reservation.total_price * 1}</p>
+               </div>
+           );
+         } else {
+           chargesSummary = '';
+         }
         console.log('state', state)
         return (
           <div>
+            <div>
+               <p>${state.room.weekday_rate * 1} <small>per weekday night</small></p>
+               <p>${state.room.weekend_rate * 1} <small>per weekend night</small></p>
+            </div>
             <form action="" method="">
               <label>Check In</label>
-              <input name="check_in" placeholder="yyyy-mm-dd" type="text" className="flatpickr"></input>
+              <input name="check_in" placeholder="yyyy-mm-dd" type="text" className="flatpickr" on-input={state.$helpers.calculatePrice}></input>
               <label>Check Out</label>
-              <input name="check_out" placeholder="yyyy-mm-dd" type="text" className="flatpickr"></input>
+              <input name="check_out" placeholder="yyyy-mm-dd" type="text" className="flatpickr" on-input={state.$helpers.calculatePrice}></input>
               <label>Guests</label>
-              <input name="guest_count" type="number" value="1" min="1" max={`${state.room.max_guests}`}></input>
+              <input name="guest_count" type="number" value="1" min="1" max={`${state.room.max_guests}`} on-input={state.$helpers.calculatePrice}></input>
               <br />
-              <input type="submit" value="Reserve" on-click={state.$helpers.submitReservation} ></input>
+              <input type="submit" value="Reserve" on-click={state.$helpers.submitReservation} on-input={state.$helpers.calculatePrice} ></input>
             </form>
+            {chargesSummary}
             <div className="room">
 
             </div>
@@ -186,19 +260,25 @@ document.registerElement('house-rules-view', class extends Component {
             }
           }
         },
-        template: (state) =>
-          <div>
+        template: (state) => {
+          if (!state.reservation || !state.reservation.check_in) {
+            state.$component.navigate('home')
+          }
+          return (
             <div>
-              <h2>Review house rules</h2>
-              <ul>
-                <li>No smoking</li>
-                <li>No yelling, there could be babies and they cry</li>
-                <li>Check in anytime before 6pm</li>
-              </ul>
-              <button name="rules_acceptance" on-click={state.$helpers.houseRules.onAcceptance}>Agree and confirm</button>
+              <div>
+                <h2>Review house rules</h2>
+                <ul>
+                  <li>No smoking</li>
+                  <li>No yelling, there could be babies and they cry</li>
+                  <li>Check in anytime before 6pm</li>
+                </ul>
+                <button name="rules_acceptance" on-click={state.$helpers.houseRules.onAcceptance}>Agree and confirm</button>
+              </div>
+              {this.child('summary-view')}
             </div>
-            {this.child('summary-view')}
-          </div>
+          );
+        }
       }
     }
 });
@@ -212,8 +292,8 @@ document.registerElement('reservation-confirmation-view', class extends Componen
             // TODO: POST to http://api.bookseattle.net/reservations
             // Retrieve reservation info from state.
             const reservation = {
-              checkin: this.state.reservation.check_in,
-              checkout: this.state.reservation.check_out,
+              check_in: this.state.reservation.check_in,
+              check_out: this.state.reservation.check_out,
               guest_count: this.state.reservation.guest_count,
               room_id: this.state.room.id
             };
