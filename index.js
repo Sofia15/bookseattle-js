@@ -44,7 +44,6 @@ document.registerElement('bookseattle-app', class extends Component {
           {this.child('errors-view')}
           {this.child(`${state.$view}-view`)}
           <footer>
-            <div className="border"></div>
             <hr></hr>
             <p><small>&copy; BookSeattle</small></p>
           </footer>
