@@ -73,7 +73,7 @@ document.registerElement('bookseattle-app', class extends Component {
       });
 
     } catch(e) {
-      console.log('error', e)
+
     }
   }
 });
@@ -134,13 +134,16 @@ document.registerElement('room-view', class extends Component {
     return {
       helpers: {
         submitReservation: (ev) => {
-          ev.preventDefault();
 
+          ev.preventDefault();
           if (this.state.errors.length > 0) return undefined;
 
           const form = ev.target.parentNode;
           const reservation = serialize(form, {hash: true})
 
+          if (!reservation.check_in || !reservation.check_out || !reservation.guest_count) {
+            return this.update({errors: ['All reservation fields are required.']});
+          }
           this.navigate('house-rules', {reservation: Object.assign(this.state.reservation, reservation), errors:[]})
         },
         calculatePrice: (ev) => {
@@ -194,7 +197,6 @@ document.registerElement('room-view', class extends Component {
 
       template: state => {
         let chargesSummary, weekdays, weekends;
-
          if (state.reservation && state.reservation.total_price) {
            if (state.reservation.weekday_count > 0) {
              weekdays = <p>${state.room.weekday_rate * 1} x {state.reservation.weekday_count} night</p>;
@@ -227,7 +229,7 @@ document.registerElement('room-view', class extends Component {
               <label>Guests</label>
               <input name="guest_count" type="number" value="1" min="1" max={`${state.room.max_guests}`} on-input={state.$helpers.calculatePrice}></input>
               <br />
-              <input type="submit" value="Reserve" on-click={state.$helpers.submitReservation} on-input={state.$helpers.calculatePrice} ></input>
+              <input type="submit" value="Reserve" on-click={state.$helpers.submitReservation}></input>
             </form>
             {chargesSummary}
             <div className="room">
@@ -284,7 +286,6 @@ document.registerElement('reservation-confirmation-view', class extends Componen
               guest_count: this.state.reservation.guest_count,
               room_id: this.state.room.id
             };
-            console.log(reservation)
             const body = JSON.stringify({reservation});
             this.onCreate(body);
           }
@@ -311,15 +312,12 @@ document.registerElement('reservation-confirmation-view', class extends Componen
 
     try {
       const response = await fetch(request);
-      console.log('reservationResponse', response)
       const body = await response.json();
-      console.log('body', body)
       if (body["errors"]) {
         return this.update({errors: body["errors"]})
       }
       this.navigate('itinerary');
     } catch(e) {
-      console.log('e', e);
     }
   }
 });
@@ -358,7 +356,6 @@ document.registerElement('summary-view', class extends Component {
   get config() {
     return {
       template: (state) =>
-        console.log(state) ||
         <aside>
          <h1>{state.reservation.check_in}</h1>
         </aside>

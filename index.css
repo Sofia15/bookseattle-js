@@ -34,7 +34,7 @@ navigation-view li {
 
 @media screen and (min-width: 38rem) {
   navigation-view li {
-    min-height: 40rem; 
+    min-height: 40rem;
   }
 }
 
@@ -81,6 +81,7 @@ footer {
   padding: 1rem;
   /*background-color: #efefef;*/
   text-align: center;
+  z-index: -1;
 }
 
 .rule_76irmj {
