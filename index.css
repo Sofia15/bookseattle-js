@@ -297,3 +297,11 @@ hr {
     vertical-align: top;
   }
 }
+
+.review-rules ul {
+ list-style-type: circle;
+}
+
+summary-view ul {
+ list-style: none;
+}
