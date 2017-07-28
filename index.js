@@ -74,13 +74,16 @@ document.registerElement('bookseattle-app', class extends Component {
 
       roomContainer.innerHTML = ""
       roomContainer.appendChild(roomHTML)
-      flatpickr(".flatpickr", {
-        minDate: room.available_days[0],
-        enable: room.available_days.map(day => day)
+      flatpickr(".flatpickr.check_in", {
+        minDate: room.available_checkin_days[0],
+        enable: room.available_checkin_days.map(day => day)
       });
-
+      flatpickr(".flatpickr.check_out", {
+        minDate: room.available_checkin_days[0],
+        enable: room.available_checkout_days.map(day => day)
+      });
     } catch(e) {
-
+      console.log('error', e);
     }
   }
 });
@@ -173,8 +176,8 @@ document.registerElement('room-view', class extends Component {
         calculatePrice: (ev) => {
           const form = ev.target.parentNode;
           const reservation = serialize(form, {hash: true})
-          const checkinIndex = this.state.room.available_days.indexOf(reservation.check_in);
-          const checkoutIndex = this.state.room.available_days.indexOf(reservation.check_out);
+          const checkinIndex = this.state.room.available_checkin_days.indexOf(reservation.check_in);
+          const checkoutIndex = this.state.room.available_checkout_days.indexOf(reservation.check_out);
 
           let weekday_count = 0;
           let weekend_count = 0;
@@ -187,7 +190,7 @@ document.registerElement('room-view', class extends Component {
             return this.update({errors: ['Check-out must be after check-in.']})
           }
 
-          const reservationDays = this.state.room.available_days.slice(
+          const reservationDays = this.state.room.available_checkout_days.slice(
             checkinIndex, checkoutIndex
           );
 
@@ -226,9 +229,9 @@ document.registerElement('room-view', class extends Component {
             </div>
             <form action="" method="">
               <label>Check In</label>
-              <input name="check_in" placeholder="yyyy-mm-dd" type="text" className="flatpickr" on-input={state.$helpers.calculatePrice}></input>
+              <input name="check_in" placeholder="yyyy-mm-dd" type="text" className="flatpickr check_in" on-input={state.$helpers.calculatePrice}></input>
               <label>Check Out</label>
-              <input name="check_out" placeholder="yyyy-mm-dd" type="text" className="flatpickr" on-input={state.$helpers.calculatePrice}></input>
+              <input name="check_out" placeholder="yyyy-mm-dd" type="text" className="flatpickr check_out" on-input={state.$helpers.calculatePrice}></input>
               <label>Guests</label>
               <input name="guest_count" type="number" value="1" min="1" max={`${state.room.max_guests}`} on-input={state.$helpers.calculatePrice}></input>
               <br />
