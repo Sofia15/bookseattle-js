@@ -2,9 +2,14 @@
   box-sizing: border-box;
 }
 
+p {
+  margin-bottom: inherit;
+}
+
 body {
   padding: .25rem;
   padding-top: 1rem;
+  margin: 0 auto !important;
   overflow-x: hidden;
 }
 
@@ -14,27 +19,21 @@ img {
 }
 
 ul {
-  list-style: none;
+  list-style: none !important;
 }
 
 bookseattle-app {
   display: block;
-  /* border: 10px solid black; */
   margin: 0 auto;
   width: 100%;
   height: 100%;
   position: relative;
-  max-width: 80rem !important;
-}
-
-errors-view {
-  text-align: center;
+  max-width: 40rem !important;
 }
 
 .icono-home {
-  margin-left: 3rem;
-  margin-top: 3rem;
-  transform: scale(1.8);
+  margin-left: 2rem;
+  margin-top: 2rem;
 }
 
 home-view img:first-of-type {
@@ -47,7 +46,7 @@ home-view img:first-of-type {
 }
 
 .title {
-  padding: 2rem;
+  font-size: 3.5rem;
   position: absolute;
   top: 1rem;
   right: 1rem;
@@ -75,14 +74,7 @@ google-map-view {
 google-map-view {
   display: block;
   max-width: 100%;
-  /* height: 20rem; */
-  min-height: 100%;
-}
-
-google-map-view div {
-  height: 50rem;
-  max-width: 100%;
-  /* overflow: visible !important; */
+  height: 35rem;
 }
 
 home-view img {
@@ -95,12 +87,30 @@ div {
 
 itinerary-view ul {
   display: block;
-  list-style: none;
 }
 
-navigation-view p:nth-of-type(2) {
+itinerary-view span {
+  font-weight: bold;
+  margin-right: 1rem;
+}
+
+itinerary-view > div > div {
+  margin: 0 auto;
+  padding-top: 2rem;
+}
+
+itinerary-summary-view img {
+  filter: grayscale(100%);
+}
+
+home-view p:nth-of-type(2) {
   font-style: italic;
   text-align: center;
+}
+
+home-view p:first-of-type,
+home-view p:nth-of-type(2) {
+  margin-bottom: 1rem;
 }
 
 navigation-view {
@@ -109,28 +119,17 @@ navigation-view {
 
 navigation-view ul {
   display: block;
-  list-style: none;
   text-align: center;
-  /* height: 100%; */
 }
 
 navigation-view li {
   font-size: 4rem;
   color: black;
   position: relative;
-  /* display: inline-block */
-  /* display: table; */
   vertical-align: middle;
-  /* min-height: 50rem; */
   text-align: center;
   table-layout: fixed;
-  /* max-width: 52rem; */
-  /* width: 100%; */
-  /* position: relative; */
 }
-
-
-/* transform: translateY(-50%); */
 
 navigation-view a {
   padding: 5rem;
@@ -155,41 +154,45 @@ navigation-view img:hover {
   filter: hue-rotate(175deg), blur(50px);
 }
 
-/* navigation-view a:hover {} */
-
 navigation-view img {
   max-width: 100%;
   filter: grayscale(100%);
   z-index: -1;
-  /* height: 100%; */
+  max-height: 25rem;
 }
 
 room-view form {
+  margin-bottom: 1rem;
   text-align: center;
 }
 
 room-view label,
-room-view input {
-  display: inline-block;
-}
-
-room-view ul:first-of-type {
-  margin-bottom: 1rem;
-}
-
-room-view ul:first-of-type li {
+room-view input,
+reservation-confirmation-view label,
+reservation-confirmation-view input {
   display: inline-block;
 }
 
 room-view li {
+  display: inline-block;
   padding-right: 2rem;
 }
 
-room-view label {
+room-view img {
+  margin-bottom: 2rem;
+}
+
+room-view .room li {
+  padding-right: 4rem;
+}
+
+room-view label,
+reservation-confirmation-view label {
   padding-right: 1rem;
 }
 
-room-view input {
+room-view input,
+reservation-confirmation-view input {
   margin-right: 2rem;
 }
 
@@ -198,11 +201,29 @@ room-view div p:first-of-type {
 }
 
 .line-item {
-  margin-bottom: .5rem !important;
+  display: block !important;
+  margin-bottom: 0 !important;
 }
 
-room-view p {
-  padding: 2rem;
+.line-item p {
+  padding: .5rem;
+}
+
+.nightly-rates {
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.room p {
+  margin-bottom: 3rem;
+}
+
+.room ul {
+  margin-bottom: 2rem;
+}
+
+room-view .room > p:first-of-type {
+  text-align: center;
 }
 
 .bookseattle-button {
@@ -210,6 +231,12 @@ room-view p {
   border-radius: 4px;
   color: white !important;
   font-variant: small-caps !important;
+  font-size: 1.25rem !important;
+  margin: 0 auto !important;
+  text-align: center !important;
+  padding: .25 .75rem !important;
+  height: 2.75rem !important;
+  line-height: 2.35 !important;
   margin: 1rem !important;
 }
 
@@ -220,35 +247,28 @@ house-rules-view {
 .review-rules,
 summary-view {
   display: inline-block;
-  padding: 4rem;
+  padding: 2rem;
   vertical-align: middle;
   text-align: left;
 }
 
-summary-view img {
-  max-width: 60rem;
+reservation-confirmation-view p {
+  text-align: center;
 }
 
-/* room-view input { */
-/*   padding-right: 1rem; */
-/* } */
+input[type='text'],
+input[type='number'] {
+  height: auto !important;
+}
 
-/*navigation-view a {
-  position: relative;
-  float: left;
-  width:  100px;
-  height: 100px;
-}*/
-
-/*navigation-view img {
-  position: relative;
-  float: left;
-  width:  100px;
-  height: 100px;
-}*/
+.payment-form {
+  padding: 3rem;
+  max-width: 40rem;
+  text-align: center;
+  margin: 0 auto;
+}
 
 footer {
-  margin-top: 6rem;
   padding: 1rem;
   text-align: right;
 }
@@ -263,25 +283,19 @@ hr {
   border-top: 0;
 }
 
-
-@media (min-width: 550px) {
-  /* html { */
-  /*   font-size: 1.4rem; */
-  /* } */
-
-  /* navigation-view ul { */
-  /*   text-align: left; */
-  /* } */
-  html {
-    font-size: 1.2rem;
+@media (min-width: 700px) {
+  bookseattle-app {
+    max-width: 90rem !important;
   }
 
-  bookseattle-app {
-    max-width: 100rem !important;
+  errors-view {
+    text-align: right;
   }
 
   .title {
     font-size: 3.5rem;
+    top: 4rem;
+    right: 4rem;
   }
 
   home-view img {
@@ -289,19 +303,32 @@ hr {
     text-align: center;
   }
 
+  room-view img {
+    max-width: 50rem;
+  }
+
   navigation-view li {
     display: inline-block;
     text-align: left;
     max-width: 60rem;
+    font-size: 5rem;
     margin: 1%;
-    vertical-align: top;
+    vertical-align: middle;
   }
-}
 
-.review-rules ul {
- list-style-type: circle;
-}
+  navigation-view a  {
+    padding: 6rem;
+  }
 
-summary-view ul {
- list-style: none;
+  house-rules-view img {
+    max-width: 30rem;
+  }
+
+  itinerary-summary-view div {
+    padding: 0;
+  }
+
+  .icono-home {
+    margin-left: 0;
+  }
 }

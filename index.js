@@ -13,10 +13,10 @@ import 'flatpickr/dist/themes/airbnb.css';
 
 const RAF = () => new Promise(requestAnimationFrame);
 
-loadMap();
-
 const CHECK_IN = '3:00pm - 6:00pm'
 const CHECK_OUT = '12:00pm'
+
+let googleMaps;
 
 document.registerElement('bookseattle-app', class extends Component {
   get config() {
@@ -45,6 +45,7 @@ document.registerElement('bookseattle-app', class extends Component {
           {this.child(`${state.$view}-view`)}
           <footer>
             <hr></hr>
+            <p><a href="mailto:bookseattlehelp@gmail.com">bookseattlehelp@gmail.com</a></p>
             <p><small>&copy; BookSeattle</small></p>
           </footer>
         </div>
@@ -89,9 +90,6 @@ document.registerElement('navigation-view', class extends Component {
     return {
       template: state =>
         <div>
-          <p>Traveling to Seattle?</p>
-          <p>Choose the room that speaks to you.</p>
-          <h4>Rooms</h4>
           <ul>
             <li>
               <a href="#rooms/paris">Paris</a>
@@ -118,7 +116,11 @@ document.registerElement('home-view', class extends Component {
         <div>
           <h1 className="title"><span>Book</span><span>Seattle</span></h1>
           <img className="banner-image" src="http://www.bookseattle.net/rooms/banner.png" />
+          <p>Traveling to Seattle?</p>
+          <p>Choose the room that speaks to you.</p>
+          <h4>Rooms</h4>
           {this.child('navigation-view')}
+          <h4>Location</h4>
           {this.child('google-map-view')}
         </div>
     };
@@ -133,11 +135,11 @@ function chargesSummary(state) {
   }
 
   if (state.reservation.weekday_count > 0) {
-    weekdays = <p className="line-item">${state.room.weekday_rate * 1} x {state.reservation.weekday_count} night</p>;
+    weekdays = <li className="line-item"><p>${state.room.weekday_rate * 1} x {state.reservation.weekday_count} night</p></li>;
   }
 
   if (state.reservation.weekend_count > 0) {
-    weekends = <p className="line-item">${state.room.weekend_rate * 1} x {state.reservation.weekend_count} night <small>(weekend rate)</small></p>;
+    weekends = <li className="line-item"><p>${state.room.weekend_rate * 1} x {state.reservation.weekend_count} night <small>(weekend rate)</small></p></li>;
   }
 
   return (
@@ -145,7 +147,7 @@ function chargesSummary(state) {
       <ul>
         {weekdays || ''}
         {weekends || ''}
-        <p><b>Total:</b> ${state.reservation.total_price * 1}</p>
+        <li className="line-item"><p><b>Total:</b> ${state.reservation.total_price * 1}</p></li>
       </ul>
     </div>
   );
@@ -217,7 +219,7 @@ document.registerElement('room-view', class extends Component {
         return (
           <div>
             <div>
-              <ul>
+              <ul className="nightly-rates">
                 <li><p>${state.room.weekday_rate * 1} <small>per weekday night</small></p></li>
                 <li><p>${state.room.weekend_rate * 1} <small>per weekend night</small></p></li>
               </ul>
@@ -259,13 +261,13 @@ document.registerElement('house-rules-view', class extends Component {
           return (
             <div>
               <div className="review-rules">
-                <h2>Review house rules</h2>
+                <h4>Review house rules</h4>
                 <ul>
                   <li>No smoking</li>
                   <li>No yelling, there could be babies and they cry</li>
                   <li>Check in anytime before 6pm</li>
                 </ul>
-                <button className="bookseattle-button" name="rules_acceptance" on-click={state.$helpers.houseRules.onAcceptance}>Agree and confirm</button>
+                <button className="bookseattle-button" on-click={state.$helpers.houseRules.onAcceptance}>Agree and confirm</button>
               </div>
               {this.child('summary-view')}
             </div>
@@ -281,22 +283,46 @@ document.registerElement('reservation-confirmation-view', class extends Componen
       helpers: {
         reservationConfirmation: {
           onBook: (ev) => {
-            const reservation = {
-              check_in: this.state.reservation.check_in,
-              check_out: this.state.reservation.check_out,
-              guest_count: this.state.reservation.guest_count,
-              room_id: this.state.room.id
-            };
-            const body = JSON.stringify({reservation});
-            this.onCreate(body);
+            if (!this.state.reservation || !this.state.reservation.check_in) {
+              return this.navigate('')
+            }
+
+            try {
+              const reservation = {
+                check_in: this.state.reservation.check_in,
+                check_out: this.state.reservation.check_out,
+                guest_count: this.state.reservation.guest_count,
+                room_id: this.state.room.id
+              };
+              const body = JSON.stringify({reservation});
+              this.onCreate(body);
+            } catch(error) {
+              this.update({errors: ['There was a problem processing your reservation.', 'Please try re-booking from the beginning.']});
+            }
           }
         }
       },
       template: (state) =>
         <div>
-          <h2>Payment Instructions</h2>
-          <p>We only accept Venmo(id: bookseattle) or cash payments at check-in</p>
-          <button className="bookseattle-button" name="reservation_confirmation" on-click={state.$helpers.reservationConfirmation.onBook}>Book</button>
+          <h4>Payment Instructions</h4>
+          <p>We only accept Venmo(id: bookseattle) or cash payments at check-in.</p>
+          <p>Please enter your name and email address to complete the reservation.</p>
+          <div className="payment-form">
+            <div>
+              <label>Given name</label>
+              <input name="given_name" required></input>
+            </div>
+            <div>
+            <label>Family name</label>
+            <input name="family_name" required></input>
+            </div>
+            <div>
+              <label>Email</label>
+              <input name="email" type="email" required></input>
+            </div>
+           <button className="bookseattle-button" name="reservation_confirmation" on-click={state.$helpers.reservationConfirmation.onBook}>Book</button>
+          </div>
+          <p>We will mail you a copy of your itinerary.</p>
         </div>
     }
   };
@@ -319,6 +345,7 @@ document.registerElement('reservation-confirmation-view', class extends Componen
       }
       this.navigate('itinerary');
     } catch(e) {
+      console.log('error', e);
     }
   }
 });
@@ -327,9 +354,12 @@ document.registerElement('itinerary-summary-view', class extends Component {
   get config() {
     return {
       template: state => {
-        console.log('state!', state)
         return <div>
           <img src={`${state.room.photo_url}`} alt="Photo of the room" />
+          <ul>
+            <li><p>Location: {state.room.location.name}</p></li>
+            <li><p>Room: {state.room.name}</p></li>
+          </ul>
           {chargesSummary(state)}
         </div>
       }
@@ -342,18 +372,23 @@ document.registerElement('itinerary-view', class extends Component {
     return {
       template: state => {
         if (!state.reservation || !state.accepted) {
-          state.$component.navigate('home')
+          return state.$component.navigate('home')
         }
 
         return (
           <div>
-            <p>Your reservation is complete.</p>
+            <h4>Reservation complete</h4>
+            <p>Your reservation is complete. Thank you for booking Seattle.</p>
             <p>Please keep a copy of the following for your records:</p>
-            {chargesSummary(state)}
-            <ul>
-              <li><p>Check in: {this.state.reservation.check_in} at {CHECK_IN}</p></li>
-              <li><p>Check out: {this.state.reservation.check_out} at {CHECK_OUT}</p></li>
-            </ul>
+            <div>
+              <ul>
+                <li className="line-item"><p><span>Location</span> {state.room.location.name}</p></li>
+                <li className="line-item"><p><span>Room</span> {state.room.name}</p></li>
+                <li className="line-item"><p><span>Check in</span> {this.state.reservation.check_in} at {CHECK_IN}</p></li>
+                <li className="line-item"><p><span>Check out</span> {this.state.reservation.check_out} at {CHECK_OUT}</p></li>
+              </ul>
+              {chargesSummary(state)}
+            </div>
           </div>
         );
       }
@@ -366,14 +401,10 @@ document.registerElement('summary-view', class extends Component {
     return {
       template: (state) => {
         if (!state.room) {
-          state.$component.navigate('home');
+          return state.$component.navigate('home');
         }
 
         return <aside>
-          <ul>
-          <li><p>Location: {state.room.location.name}</p></li>
-          <li><p>Room: {state.room.name}</p></li>
-          </ul>
           {this.child('itinerary-summary-view')}
         </aside>
       }
@@ -395,39 +426,52 @@ document.registerElement('errors-view', class extends Component {
   }
 });
 
-document.registerElement('google-map-view', class extends Component {
-  get config() {
-    return {
-      template: () =>
-        <div>
-        </div>
+document.registerElement('google-map-view', class extends HTMLElement {
+  constructor() {
+    super();
+  };
+
+  attachedCallback() {
+    this.loadMap();
+  };
+
+  async loadMap() {
+    try {
+      googleMaps = googleMaps || await loadGoogleMapsAPI({key: GOOGLE_MAPS_API_KEY});
+      const coordinates = {lat: 47.61, lng: -122.338};
+      const map = await new googleMaps.Map(this, {
+		    center: coordinates,
+		    zoom: 15
+	    });
+      await googleMaps.event.addDomListener(window, "resize", function() {
+        var center = map.getCenter();
+        googleMaps.event.trigger(map, "resize");
+        map.setCenter(center);
+      });
+
+      const infowindow = await new googleMaps.InfoWindow();
+
+      const locations = [
+        ['BookSeattle: 1215 4th Ave #1050', 47.6076, -122.3347]
+      ];
+
+      let marker;
+
+      locations.forEach(function(location, i) {
+        marker = new googleMaps.Marker({
+          position: new googleMaps.LatLng(locations[i][1], locations[i][2]),
+          map: map
+        });
+
+        googleMaps.event.addListener(marker, 'click', (function(marker, i) {
+          return function() {
+            infowindow.setContent(locations[i][0]);
+            infowindow.open(map, marker);
+          }
+        })(marker, i));
+      });
+    } catch(e) {
+      console.log('error', e)
     }
   };
 });
-
-async function loadMap() {
-  // console.log('')
-  try {
-    const googleMaps = await loadGoogleMapsAPI({key: GOOGLE_MAPS_API_KEY});
-    await RAF();
-    const mapContainer = document.querySelector('google-map-view div');
-    const coordinates = {lat: 47.6076, lng: -122.3347};
-    const map = await new googleMaps.Map(mapContainer, {
-		  center: coordinates,
-		  zoom: 15
-	  });
-    await new googleMaps.Marker({
-      position: coordinates,
-      map: map
-    });
-    googleMaps.event.addDomListener(window, "resize", function() {
-      var center = map.getCenter();
-      googleMaps.event.trigger(map, "resize");
-      map.setCenter(center);
-    });
-    await RAF();
-    return '';
-  } catch(e) {
-    console.log('error', e)
-  }
-}
