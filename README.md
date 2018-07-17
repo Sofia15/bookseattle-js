@@ -15,7 +15,7 @@ Create a website that allows for booking rooms that are available for reservatio
 - AWS
 
 ## Staying in Seattle
-![N|Solid](https://c.stocksy.com/a/LW5200/z0/497881.jpg)
+www.bookseattle.net
 
 ### Special thanks to
 Ada Developers Academy that has let me get my first steps into the IT field in Seattle. My awesome instructors Dan, Jamie and Crystal. Also, Charles, Chris, Kari, Korica, Susan, Brooks, Sarah, Elsa, Jeff, Rowan and David. My big heart goes to all my fellow Adies. I've learned so much from each one of you and we will grow more and we will rule the IT world!!
